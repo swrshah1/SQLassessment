@@ -1,0 +1,43 @@
+CREATE TABLE Production (Title VARCHAR(30), BasicTicketPrice FLOAT NOT NULL, PRIMARY KEY (Title));
+
+INSERT INTO Production VALUES ('Cats', 15.00);
+INSERT INTO Production VALUES ('Fame', 15.00);
+INSERT INTO Production VALUES ('Tosca', 15.00);
+
+CREATE TABLE Performance (PerfDate DATE NOT NULL, PerfTime TIME NOT NULL, Title VARCHAR (30) NOT NULL, PRIMARY KEY (PerfDate, PerfTime), FOREIGN KEY (Title) REFERENCES Production (Title));
+
+INSERT INTO Performance(PerfDate, PerfTime, Title) VALUES(20171101, 190000, 'Cats'), (20171102, 190000, 'Cats'), (20171103, 190000, 'Cats'), (20171103, 130000, 'Cats'), (20171104, 190000, 'Fame'), (20171105, 130000, 'Fame'), (20171105, 190000, 'Tosca'), (20171106, 130000, 'Tosca'), (20171106, 190000, 'Tosca');
+
+CREATE TABLE Booking (Email VARCHAR(320) NOT NULL , PerfDate DATE NOT NULL, PerfTime TIME NOT NULL, RowNumber CHAR(3) NOT NULL, PRIMARY KEY (PerfDate, PerfTime, RowNumber), FOREIGN KEY (PerfDate, PerfTime) REFERENCES Performance (PerfDate, PerfTime), FOREIGN KEY (RowNumber) REFERENCES Seat (RowNumber));
+
+INSERT INTO Booking(Email, PerfDate, PerfTime, RowNumber) VALUES('ZP@email.com', 20171101, 190000, 'Z18'), ('ZP@email.com', 20171101, 190000, 'Z19'), ('Jane.Dot@live.com', 20171101, 190000, 'Z16'), ('Jane.Dot@live.com', 20171105, 130000, 'U20'), ('Jane.Dot@live.com', 20171105, 130000, 'U19'), ('Mike.Stand@email.com', 20171105, 130000, 'X13'), ('Mike.Stand@email.com', 20171105, 130000, 'X14'), ('qvf3@live.com', 20171105, 130000, 'Z19');
+
+SELECT * FROM Performance WHERE Title = 'Cats' ORDER BY PerfDate, PerfTime;
+
+SELECT b.Email, p.PerfDate, p.PerfTime, p.Title
+FROM Booking b 
+INNER JOIN Performance p on p.PerfDate = b.PerfDate AND p.PerfTime = b.PerfTime
+WHERE  b.Email LIKE '%email.com%';
+
+SELECT b.Email, s.RowNumber, ROUND(pr.BasicTicketPrice * z.PriceMultiplier, 2) AS CalculatedPrice 
+FROM Seat s JOIN Booking b ON b.RowNumber = s.RowNumber 
+JOIN Zone z ON z.Name = s.Zone 
+JOIN Performance p ON b.PerfTime = p.PerfTime AND b.PerfDate = p.PerfDate 
+JOIN Production pr ON p.Title = pr.Title;
+
+SELECT s.RowNumber FROM Seat s WHERE s.RowNumber NOT IN (SELECT RowNumber FROM Booking);
+
+SELECT z.Name, z.PriceMultiplier, COUNT(s.RowNumber) AS COUNT  FROM Zone z JOIN Seat s ON z.Name = s.Zone WHERE z.PriceMultiplier > 2.3 GROUP BY s.Zone;
+
+
+
+
+
+
+
+
+
+
+
+
+
